@@ -23,6 +23,7 @@ async function run() {
   try {
     await client.connect();
     const userCollection = client.db("userData").collection("user");
+    const userReviewCollection = client.db("userData").collection("review");
     const productCollection = client.db("productData").collection("product");
     const myProductCollection = client
       .db("productData")
@@ -101,6 +102,29 @@ async function run() {
     app.post("/add_products", async (req, res) => {
       const data = req.body;
       const result = await myProductCollection.insertOne(data);
+      res.send({ result });
+    });
+
+    // ========= Get My Product API =======
+    app.get("/myPd/:email", async (req, res) => {
+      const { email } = req.params;
+      const query = { email: email };
+      const result = await myProductCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // ========= Delete My Product API =======
+    app.delete("/myPd/:id", async (req, res) => {
+      const id = req.params;
+      const query = { _id: ObjectID(id) };
+      const result = await myProductCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // ========= Add My Reviews API =======
+    app.post("/add_rev", async (req, res) => {
+      const data = req.body;
+      const result = await userReviewCollection.insertOne(data);
       res.send({ result });
     });
 
