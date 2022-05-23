@@ -25,12 +25,6 @@ async function run() {
     const userCollection = client.db("userData").collection("user");
 
     // ========= Add USER =======
-    // app.put("/user", async (req, res) => {
-    //   const data = req.body;
-    //   const result = await userCollection.insertOne(data);
-    //   res.send({ result });
-    // });
-
     app.put("/user", async (req, res) => {
       const { name, email, role } = req.body;
       const useData = {
@@ -40,11 +34,27 @@ async function run() {
           role,
         },
       };
-      // const id = req.params;
       const query = { email: email };
       const options = { upsert: true };
       const result = await userCollection.updateOne(query, useData, options);
       res.send(result);
+    });
+
+    // ========= Get All USER =======
+    app.get("/user", async (req, res) => {
+      const query = {};
+      const cursor = userCollection.find(query);
+      const user = await cursor.toArray();
+      res.send(user);
+    });
+
+    // ========= Get Specific USER =======
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params;
+      console.log(email);
+      const query = { email: email.email };
+      const cursor = await userCollection.findOne(query);
+      res.send(cursor);
     });
 
     //
