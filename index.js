@@ -25,10 +25,26 @@ async function run() {
     const userCollection = client.db("userData").collection("user");
 
     // ========= Add USER =======
-    app.post("/user", async (req, res) => {
-      const data = req.body;
-      const result = await userCollection.insertOne(data);
-      res.send({ result });
+    // app.put("/user", async (req, res) => {
+    //   const data = req.body;
+    //   const result = await userCollection.insertOne(data);
+    //   res.send({ result });
+    // });
+
+    app.put("/user", async (req, res) => {
+      const { name, email, role } = req.body;
+      const useData = {
+        $set: {
+          name,
+          email,
+          role,
+        },
+      };
+      // const id = req.params;
+      const query = { email: email };
+      const options = { upsert: true };
+      const result = await userCollection.updateOne(query, useData, options);
+      res.send(result);
     });
 
     //
