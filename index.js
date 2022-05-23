@@ -22,12 +22,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
-    const productCollection = client.db("productsData").collection("product");
+    const userCollection = client.db("userData").collection("user");
 
     // ========= Add USER =======
     app.post("/user", async (req, res) => {
       const data = req.body;
-      const result = await productCollection.insertOne(data);
+      const result = await userCollection.insertOne(data);
       res.send({ result });
     });
 
