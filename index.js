@@ -23,6 +23,7 @@ async function run() {
   try {
     await client.connect();
     const userCollection = client.db("userData").collection("user");
+    const productCollection = client.db("productData").collection("product");
 
     // ========= Add USER =======
     app.put("/user", async (req, res) => {
@@ -51,10 +52,46 @@ async function run() {
     // ========= Get Specific USER =======
     app.get("/user/:email", async (req, res) => {
       const email = req.params;
-      console.log(email);
       const query = { email: email.email };
       const cursor = await userCollection.findOne(query);
       res.send(cursor);
+    });
+
+    // ========= Get All Products =======
+    app.get("/products", async (req, res) => {
+      const query = {};
+      const cursor = productCollection.find(query);
+      const user = await cursor.toArray();
+      res.send(user);
+    });
+
+    // ========= Specific Product API =======
+    app.get("/product/:id", async (req, res) => {
+      const id = req.params;
+      console.log(id);
+      const query = { _id: ObjectID(id) };
+      const product = await productCollection.findOne(query);
+      res.send(product);
+    });
+
+    // ========= Update Product API =======
+    app.put("/product/:id", async (req, res) => {
+      const { name, quantity, price, picture, minQuantity, about } = req.body;
+      const newData = {
+        $set: {
+          name,
+          quantity,
+          price,
+          picture,
+          minQuantity,
+          about,
+        },
+      };
+      const id = req.params;
+      const query = { _id: ObjectID(id) };
+      const options = { upsert: true };
+      const result = await productCollection.updateOne(query, newData, options);
+      res.send(result);
     });
 
     //
