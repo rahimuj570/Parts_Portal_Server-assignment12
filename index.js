@@ -45,6 +45,25 @@ async function run() {
       res.send(result);
     });
 
+    // ========= Update USER =======
+    app.put("/update_user", async (req, res) => {
+      const { name, email, role, edu, city, phone } = req.body;
+      const useData = {
+        $set: {
+          name,
+          email,
+          role,
+          edu,
+          city,
+          phone,
+        },
+      };
+      const query = { email: email };
+      const options = { upsert: true };
+      const result = await userCollection.updateOne(query, useData, options);
+      res.send(result);
+    });
+
     // ========= Get All USER =======
     app.get("/user", async (req, res) => {
       const query = {};
@@ -126,6 +145,14 @@ async function run() {
       const data = req.body;
       const result = await userReviewCollection.insertOne(data);
       res.send({ result });
+    });
+
+    // ========= Get My Reviews API =======
+    app.get("/add_rev", async (req, res) => {
+      const query = {};
+      const cursor = userReviewCollection.find(query).limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
     });
 
     //
