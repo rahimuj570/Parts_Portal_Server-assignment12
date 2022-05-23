@@ -24,6 +24,9 @@ async function run() {
     await client.connect();
     const userCollection = client.db("userData").collection("user");
     const productCollection = client.db("productData").collection("product");
+    const myProductCollection = client
+      .db("productData")
+      .collection("myProduct");
 
     // ========= Add USER =======
     app.put("/user", async (req, res) => {
@@ -92,6 +95,13 @@ async function run() {
       const options = { upsert: true };
       const result = await productCollection.updateOne(query, newData, options);
       res.send(result);
+    });
+
+    // ========= Add My Product API =======
+    app.post("/add_products", async (req, res) => {
+      const data = req.body;
+      const result = await myProductCollection.insertOne(data);
+      res.send({ result });
     });
 
     //
