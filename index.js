@@ -117,7 +117,15 @@ async function run() {
       res.send(result);
     });
 
-    // ========= Add My Product API =======
+    // ========= Delete Product API =======
+    app.delete("/delete_product/:id", async (req, res) => {
+      const id = req.params;
+      const query = { _id: ObjectID(id) };
+      const result = await productCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // ========= Add Specific User Product API =======
     app.post("/add_products", async (req, res) => {
       const data = req.body;
       const result = await myProductCollection.insertOne(data);
