@@ -125,8 +125,15 @@ async function run() {
       res.send(result);
     });
 
-    // ========= Add Specific User Product API =======
+    // ========= Add Product API =======
     app.post("/add_products", async (req, res) => {
+      const data = req.body;
+      const result = await productCollection.insertOne(data);
+      res.send({ result });
+    });
+
+    // ========= Add Specific User Product API =======
+    app.post("/add_my_products", async (req, res) => {
       const data = req.body;
       const result = await myProductCollection.insertOne(data);
       res.send({ result });
