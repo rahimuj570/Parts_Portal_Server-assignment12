@@ -6,6 +6,7 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
 const app = express();
+const stripe = require("stripe")(process.env.STRIPESECRET);
 
 // ======== Middleware =========
 app.use(cors());
@@ -97,6 +98,15 @@ async function run() {
       res.send(product);
     });
 
+    // ========= checkout Specific user specific Product API =======
+    app.get("/my_product/:id", async (req, res) => {
+      const id = req.params;
+      // console.log(req.headers);
+      const query = { _id: ObjectID(id) };
+      const result = await myProductCollection.findOne(query);
+      res.send(result);
+    });
+
     // ========= Update Product API =======
     app.put("/product/:id", async (req, res) => {
       const { name, quantity, price, picture, minQuantity, about } = req.body;
@@ -168,6 +178,19 @@ async function run() {
       const cursor = userReviewCollection.find(query).limit(6);
       const result = await cursor.toArray();
       res.send(result);
+    });
+
+    // ========= STRIPE PAYMENT INTENT API =======
+    app.post("/create-payment-intent", async (req, res) => {
+      const service = req.body;
+      const price = service.totalPrice;
+      const amount = price * 100;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: ["card"],
+      });
+      res.send({ clientSecret: paymentIntent.client_secret });
     });
 
     //
