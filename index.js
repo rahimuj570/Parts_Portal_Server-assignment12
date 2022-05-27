@@ -33,36 +33,64 @@ async function run() {
     // ========= Add USER =======
     app.put("/user", async (req, res) => {
       const { name, email, role } = req.body;
-      const useData = {
-        $set: {
-          name,
-          email,
-          role,
-        },
-      };
-      const query = { email: email };
-      const options = { upsert: true };
-      const result = await userCollection.updateOne(query, useData, options);
-      res.send(result);
+      const reqAuthorization = req.headers.authorization;
+      if (reqAuthorization) {
+        const savedToken = reqAuthorization;
+        const decode = verifyToken(savedToken);
+
+        if (email === decode?.email?.email) {
+          const useData = {
+            $set: {
+              name,
+              email,
+              role,
+            },
+          };
+          const query = { email: email };
+          const options = { upsert: true };
+          const result = await userCollection.updateOne(
+            query,
+            useData,
+            options
+          );
+          res.send(result);
+        } else {
+          res.send([{ status: "unAuthorization" }]);
+        }
+      }
     });
 
     // ========= Update USER =======
     app.put("/update_user", async (req, res) => {
       const { name, email, role, edu, city, phone } = req.body;
-      const useData = {
-        $set: {
-          name,
-          email,
-          role,
-          edu,
-          city,
-          phone,
-        },
-      };
-      const query = { email: email };
-      const options = { upsert: true };
-      const result = await userCollection.updateOne(query, useData, options);
-      res.send(result);
+      const reqAuthorization = req.headers.authorization;
+      if (reqAuthorization) {
+        const savedToken = reqAuthorization;
+        const decode = verifyToken(savedToken);
+
+        if (email === decode?.email?.email) {
+          const useData = {
+            $set: {
+              name,
+              email,
+              role,
+              edu,
+              city,
+              phone,
+            },
+          };
+          const query = { email: email };
+          const options = { upsert: true };
+          const result = await userCollection.updateOne(
+            query,
+            useData,
+            options
+          );
+          res.send(result);
+        } else {
+          res.send([{ status: "unAuthorization" }]);
+        }
+      }
     });
 
     // ========= Get All USER =======
@@ -98,41 +126,56 @@ async function run() {
       res.send(product);
     });
 
-    // ========= checkout Specific user specific Product API =======
-    app.get("/my_product/:id", async (req, res) => {
-      const id = req.params;
-      // console.log(req.headers);
-      const query = { _id: ObjectID(id) };
-      const result = await myProductCollection.findOne(query);
-      res.send(result);
-    });
-
     // ========= Update Product API =======
     app.put("/product/:id", async (req, res) => {
       const { name, quantity, price, picture, minQuantity, about } = req.body;
-      const newData = {
-        $set: {
-          name,
-          quantity,
-          price,
-          picture,
-          minQuantity,
-          about,
-        },
-      };
-      const id = req.params;
-      const query = { _id: ObjectID(id) };
-      const options = { upsert: true };
-      const result = await productCollection.updateOne(query, newData, options);
-      res.send(result);
+      const reqAuthorization = req.headers.authorization?.split(" ");
+      if (reqAuthorization) {
+        const email = reqAuthorization?.[0];
+        const savedToken = reqAuthorization?.[1];
+        const decode = verifyToken(savedToken);
+        if (email === decode?.email?.email) {
+          const newData = {
+            $set: {
+              name,
+              quantity,
+              price,
+              picture,
+              minQuantity,
+              about,
+            },
+          };
+          const id = req.params;
+          const query = { _id: ObjectID(id) };
+          const options = { upsert: true };
+          const result = await productCollection.updateOne(
+            query,
+            newData,
+            options
+          );
+          res.send(result);
+        } else {
+          res.send([{ status: "unAuthorization" }]);
+        }
+      }
     });
 
     // ========= Delete Product API =======
     app.delete("/delete_product/:id", async (req, res) => {
-      const id = req.params;
-      const query = { _id: ObjectID(id) };
-      const result = await productCollection.deleteOne(query);
-      res.send(result);
+      const reqAuthorization = req.headers.authorization?.split(" ");
+      if (reqAuthorization) {
+        const email = reqAuthorization?.[0];
+        const savedToken = reqAuthorization?.[1];
+        const decode = verifyToken(savedToken);
+        if (email === decode?.email?.email) {
+          const id = req.params;
+          const query = { _id: ObjectID(id) };
+          const result = await productCollection.deleteOne(query);
+          res.send(result);
+        } else {
+          res.send([{ status: "unAuthorization" }]);
+        }
+      }
     });
 
     // ========= Add Product API =======
@@ -149,11 +192,73 @@ async function run() {
       res.send({ result });
     });
 
+    // ========= checkout Specific user specific Product API =======
+    app.get("/my_product/:id", async (req, res) => {
+      const id = req.params;
+      // console.log(req.headers);
+      const query = { _id: ObjectID(id) };
+      const result = await myProductCollection.findOne(query);
+      res.send(result);
+    });
+
     // ========= Get My Product API =======
     app.get("/myPd/:email", async (req, res) => {
       const { email } = req.params;
-      const query = { email: email };
+      const reqAuthorization = req.headers.authorization;
+      if (reqAuthorization) {
+        const decode = verifyToken(reqAuthorization);
+
+        if (email === decode?.email?.email) {
+          const query = { email: email };
+          const result = await myProductCollection.find(query).toArray();
+          res.send(result);
+        } else {
+          res.status(403).send({ message: "Unauthorized access" });
+        }
+      }
+    });
+
+    // ========= Get All Orders Product API =======
+    app.get("/myPd", async (req, res) => {
+      const query = {};
       const result = await myProductCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // ========= PAY My Product API =======
+    app.put("/my_product/:id", async (req, res) => {
+      const {
+        quantity,
+        email,
+        userName,
+        pdName,
+        price,
+        picture,
+        pdId,
+        address,
+        phone,
+        totalPrice,
+        payStatus,
+      } = req.body;
+      const newData = {
+        $set: {
+          quantity,
+          email,
+          userName,
+          pdName,
+          price,
+          picture,
+          pdId,
+          address,
+          phone,
+          totalPrice,
+          payStatus,
+        },
+      };
+      const id = req.params;
+      const query = { _id: ObjectID(id) };
+      const options = { upsert: true };
+      const result = await productCollection.updateOne(query, newData, options);
       res.send(result);
     });
 
@@ -208,6 +313,13 @@ app.get("/", async (req, res) => {
 // ========== Listening =======
 app.listen(port, () => {
   console.log("Listening to port", port);
+});
+
+// ========= Generate JWT ========
+app.post("/login", async (req, res) => {
+  const email = req.body;
+  const token = jwt.sign({ email }, process.env.TOKEN);
+  res.send({ token });
 });
 
 // ========= Verify Token =========
