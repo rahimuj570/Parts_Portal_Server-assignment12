@@ -168,7 +168,7 @@ async function run() {
 
     // ========= Delete Product API =======
     app.delete("/delete_product/:id", async (req, res) => {
-      const reqAuthorization = req.headers.authorization?.split(" ");
+      const reqAuthorization = await req.headers.authorization?.split(" ");
       if (reqAuthorization) {
         const email = reqAuthorization?.[0];
         const savedToken = reqAuthorization?.[1];
@@ -268,7 +268,11 @@ async function run() {
       const id = req.params;
       const query = { _id: ObjectID(id) };
       const options = { upsert: true };
-      const result = await productCollection.updateOne(query, newData, options);
+      const result = await myProductCollection.updateOne(
+        query,
+        newData,
+        options
+      );
       res.send(result);
     });
 
