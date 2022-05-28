@@ -37,7 +37,7 @@ async function run() {
       if (reqAuthorization) {
         const savedToken = reqAuthorization;
         const decode = verifyToken(savedToken);
-
+        console.log(decode);
         if (email === decode?.email?.email) {
           const useData = {
             $set: {
@@ -57,6 +57,8 @@ async function run() {
         } else {
           res.send([{ status: "unAuthorization" }]);
         }
+      } else {
+        res.status(403).send({ message: "Unauthorized access" });
       }
     });
 
@@ -88,8 +90,10 @@ async function run() {
           );
           res.send(result);
         } else {
-          res.send([{ status: "unAuthorization" }]);
+          res.status(403).send({ message: "Unauthorized access" });
         }
+      } else {
+        res.status(403).send({ message: "Unauthorized access" });
       }
     });
 
@@ -157,6 +161,8 @@ async function run() {
         } else {
           res.send([{ status: "unAuthorization" }]);
         }
+      } else {
+        res.status(403).send({ message: "Unauthorized access" });
       }
     });
 
@@ -175,6 +181,8 @@ async function run() {
         } else {
           res.send([{ status: "unAuthorization" }]);
         }
+      } else {
+        res.status(403).send({ message: "Unauthorized access" });
       }
     });
 
@@ -215,6 +223,8 @@ async function run() {
         } else {
           res.status(403).send({ message: "Unauthorized access" });
         }
+      } else {
+        res.status(403).send({ message: "Unauthorized access" });
       }
     });
 
